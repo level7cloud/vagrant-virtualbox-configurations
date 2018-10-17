@@ -32,7 +32,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do | config |
                     ansible.become = true
                     ansible.limit = 'all'
                     ansible.groups = {
-                        "group1" => ["level7cloud-base[1:2]"]
+                        "group1" => ["level7cloud-base[1:#{machine_id}]"]
                     }
                 end
             end
