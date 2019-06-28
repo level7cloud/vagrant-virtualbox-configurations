@@ -1,0 +1,23 @@
+---
+- hosts: all
+  tasks:
+  - name: Refresh Apt Cache
+    apt:
+        update_cache: yes
+  - name: Ensure needed packages installed
+    package: name={{ item }}  state=present
+    with_items:
+        - vim
+        - perl
+        - rsync
+        - man
+        - build-essential
+        - git
+        - curl
+        - wget
+        - telnet
+        - net-tools
+  - name: configure /etc/hosts
+    template:
+      src: hosts.j2
+      dest: /etc/hosts

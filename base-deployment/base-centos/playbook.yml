@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Ensure needed packages installed
+    package: name={{ item }}  state=present
+    with_items:
+        - vim
+        - perl
+        - rsync
+        - man
+        - git
+        - curl
+        - wget
+        - telnet
+        - net-tools
+  - name: configure /etc/hosts
+    template:
+      src: hosts.j2
+      dest: /etc/hosts

@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+VAGRANT_VM_PROVIDER = "virtualbox"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do | config |
+    VM_COUNT = 2
+
+    config.vm.provider :virtualbox do | vb |
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+        vb.customize ["modifyvm", :id, "--natnet1", "10.3/16"]
+        vb.gui = false
+    end
+    
+    (1..VM_COUNT).each do | machine_id |
+        config.vm.define "base-ubuntu-#{machine_id}" do | server |
+            server.vm.hostname = "base-ubuntu-#{machine_id}"
+            server.vm.box = "ubuntu/bionic64"
+            server.vm.network :private_network, ip: "192.168.56.11#{machine_id}"
+            server.vm.provider :virtualbox do | vb |
+                vb.name = "base-ubuntu-#{machine_id}"
+            end
+
+	    server.vm.provision "shell", inline: "which python || sudo apt -y install python"
+
+	    if machine_id == VM_COUNT
+                server.vm.provision :ansible do |ansible|
+
+                    # Disable default limit to connect to all the machines
+                    ansible.limit = "all"
+                    ansible.playbook = "playbook.yml"
+		    ansible.become = true
+                    ansible.groups = {
+                        "group1" => ["base-ubuntu-[1:#{machine_id}]"]
+                    }
+		end
+            end
+        end
+    end
+end
